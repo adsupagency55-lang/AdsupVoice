@@ -6,6 +6,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import logging
 from neucodec import NeuCodec, DistillNeuCodec
 from .standard import VieNeuTTS
+from vieneu_utils.phonemize_text import phonemize_batch
 
 logger = logging.getLogger("Vieneu.XPU")
 
@@ -159,10 +160,14 @@ class XPUVieNeuTTS(VieNeuTTS):
         if not skip_normalize:
             texts = [self.normalizer.normalize(t) for t in texts]
 
+        # Pre-phonemize all inputs for performance
+        ref_phonemes = self.get_ref_phonemes(ref_text)
+        chunk_phonemes = phonemize_batch(texts, skip_normalize=True)
+
         # Prepare prompt for each chunk in batch
         batch_prompt_ids = []
-        for text in texts:
-            prompt_ids = self._apply_chat_template(ref_codes, ref_text, text)
+        for phonemes in chunk_phonemes:
+            prompt_ids = self._apply_chat_template(ref_codes, ref_phonemes, phonemes)
             batch_prompt_ids.append(torch.tensor(prompt_ids))
             
         inputs = self.tokenizer.pad(
@@ -174,16 +179,18 @@ class XPUVieNeuTTS(VieNeuTTS):
         speech_end_id = self.tokenizer.convert_tokens_to_ids("<|SPEECH_GENERATION_END|>")
         
         with torch.no_grad():
-            output_tokens = self.backbone.generate(
-                **inputs,
-                max_length=self.max_context,
-                eos_token_id=speech_end_id,
-                do_sample=True,
-                temperature=temperature,
-                top_k=top_k,
-                use_cache=True,
-                min_new_tokens=50,
-            )
+            # Use XPU autocast for performance
+            with torch.autocast(device_type="xpu", dtype=torch.bfloat16, enabled=True):
+                output_tokens = self.backbone.generate(
+                    **inputs,
+                    max_length=self.max_context,
+                    eos_token_id=speech_end_id,
+                    do_sample=True,
+                    temperature=temperature,
+                    top_k=top_k,
+                    use_cache=True,
+                    min_new_tokens=50,
+                )
 
         # Batch Decoding
         results = []

@@ -354,7 +354,7 @@ def synthesize_speech(text: str, voice_choice: str, custom_audio, custom_text: s
         if use_batch and total_chunks > 1:
             try:
                 for i in range(0, len(text_chunks), max_batch_size_run):
-                    yield None, print(f" đang xử lý batch {i//max_batch_size_run + 1} ...")
+                    yield None, f"⏳ Đang xử lý batch {i//max_batch_size_run + 1} ..."
                     batch_chunks = text_chunks[i : i + max_batch_size_run]
                     
                     # Gọi hàm infer_batch đã viết ở trên
