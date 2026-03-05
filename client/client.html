@@ -622,6 +622,9 @@
             ERROR: 'ERROR'
         };
 
+        const SAMPLE_RATE = 24000;
+        const SEGMENT_CHAR_SIZE = 160;
+
         // ==========================================
         // ICONS
         // ==========================================
@@ -694,7 +697,7 @@
                         } catch (e) { console.error(e); }
                     }
                     // MODE B: Standard Audio Element
-                    else if (!audioContextRef.current && audioElementRef.current) {
+                    else if (!audioContextRef.current && audioElementRef?.current) {
                         try {
                             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
                             const ctx = new AudioContextClass();
@@ -842,7 +845,6 @@
                 localStorage.setItem('vieneu-theme', theme);
             }, [theme]);
 
-            const audioRef = useRef(null);
 
             // Web Audio API Refs
             const ctxRef = useRef(null);
@@ -853,14 +855,14 @@
             // Audio Recording Refs
             const recordedChunksRef = useRef([]);
 
-            const fetchVoices = async () => {
+            const fetchVoices = async (currentSelectedVoice) => {
                 try {
                     const res = await fetch(`${API_URL}/voices`);
                     const data = await res.json();
                     setVoices(data);
                     if (data.length > 0) {
                         // Keep current selection if still available, otherwise first one
-                        if (!data.find(v => v.id === selectedVoice)) {
+                        if (!data.find(v => v.id === currentSelectedVoice)) {
                             setSelectedVoice(data[0].id);
                         }
                     }
@@ -881,7 +883,7 @@
                     })
                     .catch(e => console.warn("Models API not found"));
 
-                fetchVoices();
+                fetchVoices(selectedVoice);
             }, []);
 
             const handleModelChange = async (key) => {
@@ -897,7 +899,7 @@
                     if (data.status === "ok") {
                         setCurrentModel(key);
                         // Refresh voices for new model
-                        await fetchVoices();
+                        await fetchVoices(selectedVoice);
                     } else {
                         alert("Error switching model: " + data.message);
                     }
@@ -927,7 +929,7 @@
 
                 // 1. Init Web Audio
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                const ctx = new AudioContextClass({ sampleRate: 24000 });
+                const ctx = new AudioContextClass({ sampleRate: SAMPLE_RATE });
                 ctxRef.current = ctx;
 
                 const analyser = ctx.createAnalyser();
@@ -984,7 +986,7 @@
                                     float32[i] = int16[i] / 32768.0;
                                 }
 
-                                const buffer = ctx.createBuffer(1, float32.length, 24000);
+                                const buffer = ctx.createBuffer(1, float32.length, SAMPLE_RATE);
                                 buffer.getChannelData(0).set(float32);
 
                                 const source = ctx.createBufferSource();
@@ -1077,8 +1079,8 @@
                 view.setUint32(16, 16, true);
                 view.setUint16(20, 1, true); // PCM
                 view.setUint16(22, 1, true); // Mono
-                view.setUint32(24, 24000, true); // 24kHz
-                view.setUint32(28, 24000 * 2, true); // ByteRate
+                view.setUint32(24, SAMPLE_RATE, true); // 24kHz
+                view.setUint32(28, SAMPLE_RATE * 2, true); // ByteRate
                 view.setUint16(32, 2, true); // BlockAlign
                 view.setUint16(34, 16, true); // BitsPerSample
                 // data sub-chunk
@@ -1115,13 +1117,8 @@
                 URL.revokeObjectURL(url);
             };
 
-            // Remove unused audio element handlers
-            const onPlay = () => { };
-            const onEnded = () => { };
-            const onError = () => { };
-
             const charCount = text.length;
-            const segmentEstimate = Math.max(1, Math.ceil(charCount / 160));
+            const segmentEstimate = Math.max(1, Math.ceil(charCount / SEGMENT_CHAR_SIZE));
             const statusLabel = status === StreamStatus.IDLE
                 ? 'READY'
                 : status === StreamStatus.CONNECTING
@@ -1254,7 +1251,6 @@
                                 </div>
 
                                 <Visualizer
-                                    audioElementRef={audioRef}
                                     isPlaying={status === StreamStatus.PLAYING}
                                     externalContext={ctxRef.current}
                                     externalSource={analyserNode}
@@ -1299,14 +1295,6 @@
                                 </div>
                             </div>
                         </div>
-                        {/* Hidden Audio Element */}
-                        <audio
-                            ref={audioRef}
-                            onPlay={onPlay}
-                            onEnded={onEnded}
-                            onError={onError}
-                            className="hidden"
-                        />
                     </div>
                 </div>
             );
