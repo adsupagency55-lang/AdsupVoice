@@ -8,7 +8,7 @@ import soundfile as sf
 from typing import Optional, List
 from functools import lru_cache
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -242,13 +242,14 @@ async def generate(req: GenerateRequest):
 
 @app.post("/api/generate_clone")
 async def generate_clone(
-    text: str,
+    text: str = Form(...),
     ref_audio: UploadFile = File(...),
-    ref_text: str = "",
-    temperature: float = 1.0,
-    max_chars_chunk: int = 256,
+    ref_text: str = Form(""),
+    temperature: float = Form(1.0),
+    max_chars_chunk: int = Form(256),
 ):
     """Generate speech using a reference audio file for voice cloning."""
+    print(f"🎤 [CLONE] Text length: {len(text)}, Ref Text: '{ref_text}', Temp: {temperature}")
     if not model_loaded or tts is None:
         raise HTTPException(503, "Model not loaded yet.")
 
