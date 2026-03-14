@@ -852,128 +852,375 @@ def synthesize_speech(text: str, voice_choice: str, custom_audio, custom_text: s
 
 
 # --- 4. UI SETUP ---
-theme = gr.themes.Soft(
-    primary_hue="indigo",
+theme = gr.themes.Base(
+    primary_hue="blue",
     secondary_hue="cyan",
     neutral_hue="slate",
     font=[gr.themes.GoogleFont('Inter'), 'ui-sans-serif', 'system-ui'],
+    font_mono=[gr.themes.GoogleFont('JetBrains Mono'), 'monospace'],
 ).set(
-    button_primary_background_fill="linear-gradient(90deg, #6366f1 0%, #0ea5e9 100%)",
-    button_primary_background_fill_hover="linear-gradient(90deg, #4f46e5 0%, #0284c7 100%)",
+    # Core backgrounds
+    background_fill_primary="#0d1117",
+    background_fill_secondary="#161b22",
+    background_fill_primary_dark="#0d1117",
+    background_fill_secondary_dark="#161b22",
+    # Borders
+    border_color_primary="#21262d",
+    border_color_primary_dark="#21262d",
+    # Text
+    body_text_color="#c9d1d9",
+    body_text_color_dark="#c9d1d9",
+    color_accent="#58a6ff",
+    color_accent_soft="rgba(88, 166, 255, 0.1)",
+    # Buttons
+    button_primary_background_fill="linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%)",
+    button_primary_background_fill_hover="linear-gradient(135deg, #2563eb 0%, #38bdf8 100%)",
+    button_primary_text_color="#ffffff",
+    button_primary_border_color="transparent",
+    button_secondary_background_fill="#21262d",
+    button_secondary_background_fill_hover="#30363d",
+    button_secondary_text_color="#c9d1d9",
+    button_secondary_border_color="#30363d",
+    # Inputs
+    input_background_fill="#161b22",
+    input_background_fill_dark="#161b22",
+    input_border_color="#30363d",
+    input_border_color_focus="#58a6ff",
+    input_shadow_focus="0 0 0 3px rgba(88, 166, 255, 0.15)",
+    # Blocks
+    block_background_fill="#161b22",
+    block_background_fill_dark="#161b22",
+    block_border_color="#21262d",
+    block_border_width="1px",
+    block_label_background_fill="transparent",
+    block_label_text_color="#8b949e",
+    block_title_text_color="#c9d1d9",
+    block_shadow="0 4px 24px rgba(0,0,0,0.4)",
+    block_radius="12px",
+    # Tabs
+    checkbox_background_color="#21262d",
+    checkbox_background_color_selected="#1d4ed8",
+    # Slider
+    slider_color="#1d4ed8",
 )
 
 css = """
-.container { max-width: 1400px; margin: auto; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+* { box-sizing: border-box; }
+
+body, .gradio-container {
+    background: #0d1117 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* ──────────── MAIN CONTAINER ──────────── */
+.container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
+
+/* ──────────── ANIMATED HEADER ──────────── */
 .header-box {
+    position: relative;
+    overflow: hidden;
     text-align: center;
-    margin-bottom: 25px;
-    padding: 25px;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    border-radius: 12px;
+    margin-bottom: 28px;
+    padding: 36px 32px 28px;
+    background: linear-gradient(135deg, #0d1117 0%, #0f172a 50%, #0d1117 100%);
+    border: 1px solid #21262d;
+    border-radius: 16px;
     color: white !important;
+}
+.header-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #1d4ed8, #0ea5e9, #38bdf8, transparent);
+    animation: headerLine 3s ease-in-out infinite;
+}
+@keyframes headerLine {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
 }
 .header-title {
-    font-size: 2.5rem;
+    font-size: 2.4rem;
     font-weight: 800;
+    letter-spacing: -0.03em;
     color: white !important;
+    margin-bottom: 4px;
+    line-height: 1.2;
 }
 .gradient-text {
-    background: -webkit-linear-gradient(45deg, #60A5FA, #22D3EE);
+    background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #06b6d4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
-.header-icon {
-    color: white;
+.header-subtitle {
+    color: #8b949e;
+    font-size: 0.9rem;
+    margin-top: 6px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
 }
-.status-box {
-    font-weight: 500;
-    border: 1px solid rgba(99, 102, 241, 0.1);
-    background: rgba(99, 102, 241, 0.03);
-    border-radius: 8px;
-}
-.status-box textarea {
-    text-align: center;
-    font-family: inherit;
-}
-.model-card-content {
+.header-badges {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
-    gap: 15px;
-    font-size: 0.9rem;
-    text-align: center;
-    color: white !important;
+    gap: 10px;
+    margin-top: 18px;
 }
-.model-card-item {
+.header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: rgba(88, 166, 255, 0.08);
+    border: 1px solid rgba(88, 166, 255, 0.2);
+    border-radius: 20px;
+    font-size: 0.82rem;
+    color: #8b949e;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.header-badge:hover {
+    background: rgba(88, 166, 255, 0.15);
+    border-color: rgba(88, 166, 255, 0.4);
+    color: #60a5fa;
+    transform: translateY(-1px);
+}
+.header-badge a {
+    color: inherit;
+    text-decoration: none;
+}
+.header-badge .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* ──────────── SECTION PANELS ──────────── */
+.panel-section {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+}
+.panel-section:hover {
+    border-color: #30363d;
+}
+.section-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #58a6ff;
+    margin-bottom: 14px;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 6px;
-    color: white !important;
 }
-.model-card-item strong {
-    color: white !important;
+.section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, #21262d, transparent);
 }
-.model-card-item span {
-    color: white !important;
-}
-.model-card-link {
-    color: #60A5FA;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-.model-card-link:hover {
-    color: #22D3EE;
-    text-decoration: underline;
-}
-.warning-banner {
-    background-color: #fffbeb;
-    border: 1px solid #fef3c7;
+
+/* ──────────── TIPS PANEL (replaces yellow warning) ──────────── */
+.tips-panel {
+    background: linear-gradient(135deg, rgba(13, 17, 23, 0.9), rgba(22, 27, 34, 0.9));
+    border: 1px solid #21262d;
     border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 20px;
+    padding: 18px;
+    margin-bottom: 16px;
 }
-.warning-banner-title {
-    color: #92400e;
-    font-weight: 700;
-    font-size: 1.1rem;
+.tips-panel-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #f59e0b;
 }
-.warning-banner-grid {
+.tips-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+@media (max-width: 768px) {
+    .tips-grid { grid-template-columns: 1fr; }
+}
+.tip-card {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid #21262d;
+    border-radius: 10px;
+    padding: 14px;
+    transition: border-color 0.2s, transform 0.2s;
+}
+.tip-card:hover {
+    border-color: #30363d;
+    transform: translateY(-1px);
+}
+.tip-card-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
     display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
 }
-.warning-banner-item {
-    flex: 1;
-    min-width: 240px;
-    background: #fef3c7;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #fde68a;
+.tip-card-title.cpu { color: #f59e0b; }
+.tip-card-title.gpu { color: #38bdf8; }
+.tip-card-body {
+    color: #8b949e;
+    font-size: 0.82rem;
+    line-height: 1.6;
 }
-.warning-banner-item strong {
-    color: #b45309;
-    display: block;
-    margin-bottom: 4px;
-    font-size: 0.95rem;
-}
-.warning-banner-content {
-    color: #78350f;
-    font-size: 0.9rem;
-    line-height: 1.5;
-}
-.warning-banner-content b {
-    color: #451a03;
-    background: rgba(251, 191, 36, 0.2);
-    padding: 1px 4px;
+.tip-card-body b, .tip-card-body strong {
+    color: #c9d1d9;
+    background: rgba(48, 54, 61, 0.7);
+    padding: 1px 6px;
     border-radius: 4px;
+    font-size: 0.8rem;
 }
+
+/* ──────────── STATUS BOX ──────────── */
+.status-box {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.82rem !important;
+    font-weight: 500;
+    border: 1px solid #21262d !important;
+    background: rgba(13, 17, 23, 0.8) !important;
+    border-radius: 10px !important;
+    color: #8b949e !important;
+}
+.status-box textarea {
+    font-family: 'JetBrains Mono', monospace !important;
+    color: #58a6ff !important;
+    background: transparent !important;
+}
+
+/* ──────────── BUTTON OVERRIDES ──────────── */
+.gr-button-primary {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    box-shadow: 0 4px 16px rgba(29, 78, 216, 0.3) !important;
+    transition: all 0.2s ease !important;
+}
+.gr-button-primary:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(29, 78, 216, 0.45) !important;
+}
+.gr-button-stop {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+
+/* ──────────── GRADIO BLOCK OVERRIDES ──────────── */
+.gradio-container .tabitem {
+    background: #161b22 !important;
+    border-color: #21262d !important;
+}
+.gradio-container .tabs {
+    border-bottom-color: #21262d !important;
+}
+.gradio-container .tab-nav button {
+    border-radius: 8px 8px 0 0 !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+    color: #8b949e !important;
+    transition: all 0.2s;
+}
+.gradio-container .tab-nav button.selected {
+    color: #58a6ff !important;
+    border-bottom-color: #1d4ed8 !important;
+    background: rgba(88, 166, 255, 0.05) !important;
+}
+.gradio-container label {
+    color: #8b949e !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.03em !important;
+}
+.gradio-container input, .gradio-container textarea, .gradio-container select {
+    background: #0d1117 !important;
+    border-color: #30363d !important;
+    color: #c9d1d9 !important;
+    border-radius: 8px !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.gradio-container input:focus, .gradio-container textarea:focus {
+    border-color: #58a6ff !important;
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.12) !important;
+    outline: none !important;
+}
+.gradio-container .block {
+    background: #161b22 !important;
+    border-color: #21262d !important;
+    border-radius: 12px !important;
+}
+.gradio-container .dropdown {
+    background: #161b22 !important;
+    border-color: #30363d !important;
+}
+.gradio-container .prose {
+    color: #8b949e !important;
+}
+.gradio-container .prose a {
+    color: #58a6ff !important;
+}
+.gradio-container .prose code {
+    background: rgba(48,54,61,0.7) !important;
+    color: #f0883e !important;
+    border-radius: 4px !important;
+    padding: 2px 6px !important;
+    font-size: 0.8rem !important;
+}
+
+/* ──────────── WATERMARK NOTE ──────────── */
+.watermark-note {
+    text-align: center;
+    color: #484f58;
+    font-size: 0.75rem;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+.watermark-note .wm-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #30363d;
+}
+
+/* ──────────── ACCORDION ──────────── */
+.gradio-container .accordion {
+    border-color: #21262d !important;
+    background: #0d1117 !important;
+    border-radius: 10px !important;
+}
+.gradio-container .accordion-header {
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    color: #8b949e !important;
+}
+
+/* ──────────── SCROLLBAR ──────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0d1117; }
+::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #484f58; }
 """
 
 EXAMPLES_LIST = [
@@ -982,9 +1229,13 @@ EXAMPLES_LIST = [
 ]
 
 
-# Favicon (Parrot Emoji)
+# Favicon & Google Fonts preload
 head_html = """
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦜</text></svg>">
+<meta name="color-scheme" content="dark">
 """
 
 with gr.Blocks(theme=theme, css=css, title="VieNeu-TTS", head=head_html) as demo:
@@ -992,29 +1243,15 @@ with gr.Blocks(theme=theme, css=css, title="VieNeu-TTS", head=head_html) as demo
     with gr.Column(elem_classes="container"):
         gr.HTML("""
 <div class="header-box">
-    <h1 class="header-title">
-        <span class="header-icon">🦜</span>
-        <span class="gradient-text">VieNeu-TTS Studio</span>
-    </h1>
-    <div class="model-card-content">
-        <div class="model-card-item">
-            <strong>Models:</strong>
-            <a href="https://huggingface.co/pnnbao-ump/VieNeu-TTS" target="_blank" class="model-card-link">VieNeu-TTS</a>
-            <span>•</span>
-            <a href="https://huggingface.co/pnnbao-ump/VieNeu-TTS-0.3B" target="_blank" class="model-card-link">VieNeu-TTS-0.3B</a>
-        </div>
-        <div class="model-card-item">
-            <strong>Repository:</strong>
-            <a href="https://github.com/pnnbao97/VieNeu-TTS" target="_blank" class="model-card-link">GitHub</a>
-        </div>
-        <div class="model-card-item">
-            <strong>Tác giả:</strong>
-            <a href="https://www.facebook.com/pnnbao97" target="_blank" class="model-card-link">Phạm Nguyễn Ngọc Bảo</a>
-        </div>
-        <div class="model-card-item">
-            <strong>Discord:</strong>
-            <a href="https://discord.gg/yJt8kzjzWZ" target="_blank" class="model-card-link">Tham gia cộng đồng</a>
-        </div>
+    <p class="header-subtitle">ON-DEVICE VIETNAMESE TEXT-TO-SPEECH</p>
+    <h1 class="header-title"><span class="gradient-text">🦜 VieNeu-TTS Studio</span></h1>
+    <p class="header-subtitle">Instant Voice Cloning &nbsp;·&nbsp; Real-time Streaming &nbsp;·&nbsp; GPU &amp; CPU</p>
+    <div class="header-badges">
+        <span class="header-badge"><span class="badge-dot"></span> Online</span>
+        <span class="header-badge"><a href="https://huggingface.co/pnnbao-ump/VieNeu-TTS" target="_blank">🤗 VieNeu-TTS 0.5B</a></span>
+        <span class="header-badge"><a href="https://huggingface.co/pnnbao-ump/VieNeu-TTS-0.3B" target="_blank">🤗 VieNeu-TTS 0.3B</a></span>
+        <span class="header-badge"><a href="https://github.com/pnnbao97/VieNeu-TTS" target="_blank">⭐ GitHub</a></span>
+        <span class="header-badge"><a href="https://discord.gg/yJt8kzjzWZ" target="_blank">💬 Discord</a></span>
     </div>
 </div>
         """)
@@ -1066,22 +1303,22 @@ with gr.Blocks(theme=theme, css=css, title="VieNeu-TTS", head=head_html) as demo
             """)
             
             gr.HTML("""
-            <div class="warning-banner">
-                <div class="warning-banner-title">
-                    🦜 Gợi ý tối ưu hiệu năng
-                </div>
-                <div class="warning-banner-grid">
-                    <div class="warning-banner-item">
-                        <strong>🐢 Hệ máy CPU</strong>
-                        <div class="warning-banner-content">
-                            Sử dụng <b>VieNeu-TTS-0.3B-q4-gguf</b> để đạt tốc độ xử lý nhanh nhất. Nếu ưu tiên độ chính xác thì dùng <b>VieNeu-TTS-0.3B-q8-gguf</b>.
+            <div class="tips-panel">
+                <div class="tips-panel-header">⚡ Performance Tips</div>
+                <div class="tips-grid">
+                    <div class="tip-card">
+                        <div class="tip-card-title cpu">🐢 CPU-only Machine</div>
+                        <div class="tip-card-body">
+                            Use <b>VieNeu-TTS-0.3B-q4-gguf</b> for maximum speed.
+                            For better accuracy, choose <b>VieNeu-TTS-0.3B-q8-gguf</b>.
                         </div>
                     </div>
-                    <div class="warning-banner-item">
-                        <strong>🐆 Hệ máy GPU</strong>
-                        <div class="warning-banner-content">
-                            Chọn <b>VieNeu-TTS-0.3B (GPU)</b> để x2 tốc độ (chính xác ~80% nhưng tốc độ nhanh hơn). Nếu muốn độ chính xác cao nhất, hãy sử dụng <b>VieNeu-TTS</b> gốc.<br><br>
-                            ⚠️ <b>Lưu ý GPU cũ (RTX 10/20, T4):</b> Các GPU này không hỗ trợ bfloat16, nên khi dùng LMDeploy <b>bắt buộc</b> phải chọn <b>VieNeu-TTS-0.3B</b> thay vì bản VieNeu-TTS gốc.
+                    <div class="tip-card">
+                        <div class="tip-card-title gpu">🐆 NVIDIA GPU Machine</div>
+                        <div class="tip-card-body">
+                            Use <b>VieNeu-TTS-0.3B (GPU)</b> for 2× speed with ~80% accuracy.
+                            For top quality, use the full <b>VieNeu-TTS</b>.<br><br>
+                            ⚠️ <strong>Older GPUs (RTX 10/20, T4):</strong> Must use <b>VieNeu-TTS-0.3B</b> with LMDeploy — no bfloat16 support.
                         </div>
                     </div>
                 </div>
@@ -1178,7 +1415,7 @@ with gr.Blocks(theme=theme, css=css, title="VieNeu-TTS", head=head_html) as demo
                     max_lines=10,
                     show_copy_button=True
                 )
-                gr.Markdown("<div style='text-align: center; color: #64748b; font-size: 0.8rem;'>🔒 Audio được đóng dấu bản quyền ẩn (Watermarker) để bảo mật và định danh AI.</div>")
+                gr.HTML("<div class='watermark-note'><span class='wm-dot'></span> Audio được đóng dấu bản quyền ẩn (Watermarker) để bảo mật và định danh AI. <span class='wm-dot'></span></div>")
         
         # # --- EVENT HANDLERS ---
         # def update_info(backbone: str) -> str:
