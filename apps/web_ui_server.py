@@ -132,19 +132,22 @@ async def load_model(req: LoadModelRequest, background_tasks: BackgroundTasks):
                 codec_cfg    = CODEC_CONFIGS[req.codec]
 
                 # Device resolution
-                dev = req.device.lower()
-                if dev == "auto":
-                    bb_dev = "cuda" if torch.cuda.is_available() else "cpu"
-                elif dev == "cuda":
-                    bb_dev = "cuda"
+                dev_choice = req.device.lower()
+                if dev_choice == "auto":
+                    device_is_gpu = torch.cuda.is_available()
+                elif dev_choice == "cuda":
+                    device_is_gpu = torch.cuda.is_available()
                 else:
-                    bb_dev = "cpu"
+                    device_is_gpu = False
 
-                if "gguf" in backbone_cfg["repo"].lower() and bb_dev == "cuda":
-                    bb_dev = "gpu"
-
-                cc_dev = "cpu" if codec_cfg.get("use_preencoded") else bb_dev
-                if "onnx" in codec_cfg["repo"].lower():
+                # Backbone device
+                bb_dev = "cuda" if device_is_gpu else "cpu"
+                if "gguf" in backbone_cfg["repo"].lower() and device_is_gpu:
+                    bb_dev = "gpu" # llama-cpp-python uses "gpu"
+                
+                # Codec device (Always PyTorch/ONNX, so "cuda" or "cpu", NOT "gpu")
+                cc_dev = "cuda" if device_is_gpu else "cpu"
+                if codec_cfg.get("use_preencoded") or "onnx" in codec_cfg["repo"].lower():
                     cc_dev = "cpu"
 
                 # Load
