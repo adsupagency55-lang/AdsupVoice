@@ -1229,13 +1229,64 @@ EXAMPLES_LIST = [
 ]
 
 
-# Favicon & Google Fonts preload
+# Full override style injection
 head_html = """
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦜</text></svg>">
 <meta name="color-scheme" content="dark">
+<style>
+/* RESET */
+*, *::before, *::after { box-sizing: border-box !important; }
+html, body { background: #060d19 !important; color: #cdd6f4 !important; font-family: 'Inter', sans-serif !important; margin: 0 !important; }
+body > gradio-app, gradio-app > div, gradio-app .contain, .gradio-container { background: #060d19 !important; font-family: 'Inter', sans-serif !important; }
+/* BLOCKS */
+.gradio-container .block, .gradio-container .gr-group, .gradio-container .gr-form { background: #0e1728 !important; border: 1px solid #1e2d45 !important; border-radius: 14px !important; box-shadow: 0 2px 20px rgba(0,0,0,0.5) !important; }
+/* LABELS */
+.gradio-container label > span, .gradio-container .label-wrap span { color: #7c8fa8 !important; font-size: 0.78rem !important; font-weight: 600 !important; letter-spacing: 0.05em !important; text-transform: uppercase !important; }
+/* INPUTS */
+.gradio-container input, .gradio-container textarea, .gradio-container select { background: #060d19 !important; border: 1.5px solid #1e2d45 !important; border-radius: 10px !important; color: #cdd6f4 !important; font-family: 'Inter', sans-serif !important; font-size: 0.88rem !important; }
+.gradio-container input:focus, .gradio-container textarea:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59,130,246,0.2) !important; outline: none !important; }
+.gradio-container input::placeholder, .gradio-container textarea::placeholder { color: #3d5270 !important; }
+/* DROPDOWNS */
+.gradio-container .wrap-inner, .gradio-container ul[role="listbox"], .gradio-container .secondary-wrap { background: #0e1728 !important; border-color: #1e2d45 !important; color: #cdd6f4 !important; }
+/* BUTTONS */
+.gradio-container button.primary { background: linear-gradient(135deg, #1a5cff 0%, #0ea5e9 100%) !important; border: none !important; border-radius: 10px !important; color: #fff !important; font-weight: 700 !important; box-shadow: 0 4px 20px rgba(26,92,255,0.4) !important; transition: all 0.2s ease !important; }
+.gradio-container button.primary:hover { transform: translateY(-2px) !important; box-shadow: 0 8px 28px rgba(26,92,255,0.55) !important; }
+.gradio-container button.secondary { background: #0e1728 !important; border: 1.5px solid #1e2d45 !important; border-radius: 10px !important; color: #7c8fa8 !important; font-weight: 600 !important; }
+.gradio-container button.secondary:hover { border-color: #3b82f6 !important; color: #60a5fa !important; }
+.gradio-container button.stop { background: rgba(239,68,68,0.1) !important; border: 1.5px solid rgba(239,68,68,0.3) !important; color: #f87171 !important; border-radius: 10px !important; }
+/* TABS */
+.gradio-container .tab-nav { background: transparent !important; border-bottom: 1px solid #1e2d45 !important; }
+.gradio-container .tab-nav button { background: transparent !important; border: none !important; border-bottom: 2px solid transparent !important; color: #4e6380 !important; font-weight: 500 !important; padding: 10px 18px !important; transition: all 0.2s !important; }
+.gradio-container .tab-nav button:hover { color: #93c3fd !important; background: rgba(59,130,246,0.05) !important; }
+.gradio-container .tab-nav button.selected { color: #60a5fa !important; border-bottom-color: #3b82f6 !important; background: rgba(59,130,246,0.08) !important; font-weight: 700 !important; }
+.gradio-container .tabitem { background: #0e1728 !important; border-color: #1e2d45 !important; }
+/* ACCORDION */
+.gradio-container .accordion, .gradio-container details { background: #060d19 !important; border: 1px solid #1e2d45 !important; border-radius: 10px !important; }
+.gradio-container .accordion summary, .gradio-container details > summary { color: #7c8fa8 !important; font-size: 0.8rem !important; font-weight: 600 !important; }
+/* MARKDOWN */
+.gradio-container .prose, .gradio-container .md { color: #7c8fa8 !important; }
+.gradio-container .prose a { color: #60a5fa !important; }
+.gradio-container .prose code, .gradio-container .prose pre { background: rgba(30,45,69,0.8) !important; color: #f0883e !important; border: 1px solid #1e2d45 !important; border-radius: 6px !important; font-family: 'JetBrains Mono', monospace !important; }
+.gradio-container .prose strong, .gradio-container .prose b { color: #cdd6f4 !important; }
+/* STATUS BOX */
+.status-box textarea, .status-box input { font-family: 'JetBrains Mono', monospace !important; font-size: 0.78rem !important; color: #38bdf8 !important; }
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #060d19; }
+::-webkit-scrollbar-thumb { background: #1e2d45; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2d4a6b; }
+/* ANIMATIONS */
+@keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+@keyframes badge-in { from { opacity:0; transform: scale(0.85); } to { opacity:1; transform: scale(1); } }
+.header-box { animation: fadeUp 0.6s ease both; }
+.header-badge { animation: badge-in 0.5s ease both; }
+.header-badge:nth-child(1){animation-delay:0.1s} .header-badge:nth-child(2){animation-delay:0.2s}
+.header-badge:nth-child(3){animation-delay:0.3s} .header-badge:nth-child(4){animation-delay:0.4s}
+.header-badge:nth-child(5){animation-delay:0.5s}
+</style>
 """
 
 with gr.Blocks(theme=theme, css=css, title="VieNeu-TTS", head=head_html) as demo:
