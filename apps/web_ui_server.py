@@ -14,6 +14,15 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
+import logging
+
+# Configure logging to see output from libraries
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    stream=sys.stdout
+)
+logger = logging.getLogger("web_ui")
 
 print("⏳ Đang khởi động AdsupVoice Web UI...")
 
@@ -150,6 +159,7 @@ async def load_model(req: LoadModelRequest, background_tasks: BackgroundTasks):
                 if codec_cfg.get("use_preencoded") or "onnx" in codec_cfg["repo"].lower():
                     cc_dev = "cpu"
 
+                print(f"⏳ Loading backbone: {req.backbone} on {bb_dev}...", flush=True)
                 # Load
                 tts = VieNeuTTS(
                     backbone_repo=backbone_cfg["repo"],
@@ -161,9 +171,11 @@ async def load_model(req: LoadModelRequest, background_tasks: BackgroundTasks):
                 current_codec     = req.codec
                 model_loaded      = True
                 using_lmdeploy    = False
-                print(f"✅ Model loaded: {req.backbone}")
+                print(f"✅ Model loaded: {req.backbone}", flush=True)
             except Exception as e:
-                print(f"❌ Model load failed: {e}")
+                import traceback
+                traceback.print_exc()
+                print(f"❌ Model load failed: {e}", flush=True)
                 model_loaded = False
 
     background_tasks.add_task(_load)
