@@ -235,6 +235,9 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
     const mode = tab.dataset.mode;
     $('panel-preset').classList.toggle('hidden', mode !== 'preset');
     $('panel-clone').classList.toggle('hidden',  mode !== 'clone');
+    // Swap which generate button shows in the sticky bar
+    $('btn-generate').classList.toggle('hidden', mode !== 'preset');
+    $('btn-generate-clone').classList.toggle('hidden', mode !== 'clone');
   });
 });
 
