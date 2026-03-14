@@ -110,6 +110,9 @@ web = [
     "accelerate; sys_platform == 'darwin'",
     "gradio>=5.49.1",
     "trafilatura>=2.0.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "python-multipart>=0.0.12",
 ]
 
 [tool.pytest.ini_options]
