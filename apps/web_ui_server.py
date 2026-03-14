@@ -117,11 +117,13 @@ async def load_model(req: LoadModelRequest, background_tasks: BackgroundTasks):
     if req.codec not in CODEC_CONFIGS:
         raise HTTPException(400, f"Unknown codec: {req.codec}")
 
+    global model_loaded
+    model_loaded = False
+
     def _load():
         global tts, model_loaded, using_lmdeploy, current_backbone, current_codec
         with loading_lock:
             try:
-                model_loaded = False
                 if tts is not None:
                     tts = None
                     cleanup_gpu()
@@ -296,7 +298,12 @@ async def generate_clone(
         ref_path = ref_tmp.name
 
     try:
-        ref_codes = tts.encode_reference(ref_path)
+        try:
+            ref_codes = tts.encode_reference(ref_path)
+        except Exception as e:
+            if "has no functionality to encode" in str(e):
+                raise HTTPException(400, "Codec này không hỗ trợ Clone giọng nói (không có bộ Encode). Vui lòng chọn Codec 'Standard' hoặc 'Distill' trong phần Setting.")
+            raise e
         if isinstance(ref_codes, torch.Tensor):
             ref_codes = ref_codes.cpu().numpy()
 
