@@ -162,13 +162,41 @@ function renderCarousel() {
   }).join('');
 
   track.querySelectorAll('.voice-card').forEach(card => {
+    const playBtn = card.querySelector('.vc-play');
+    const voiceId = card.dataset.id;
+
     card.addEventListener('click', () => {
-      selectedVoiceId   = card.dataset.id;
+      selectedVoiceId   = voiceId;
       selectedVoiceName = card.dataset.name;
       updateSelectedVoiceUI();
       renderCarousel();
     });
+
+    playBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playPreview(voiceId, playBtn);
+    });
   });
+}
+
+const audioPreview = new Audio();
+async function playPreview(voiceId, btn) {
+  if (btn.textContent === '⏳') return;
+  const oldTxt = btn.textContent;
+  btn.textContent = '⏳';
+  
+  try {
+    const r = await fetch(`${API}/api/preview_voice?voice_id=${encodeURIComponent(voiceId)}`);
+    if (!r.ok) throw new Error('Preview failed');
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    audioPreview.src = url;
+    audioPreview.play();
+  } catch(e) {
+    toast('Không thể tải bản nghe thử', 'error');
+  } finally {
+    btn.textContent = oldTxt;
+  }
 }
 
 function updateSelectedVoiceUI() {

@@ -187,6 +187,43 @@ class GenerateRequest(BaseModel):
     use_batch: bool = False
     max_batch_size: int = 4
 
+@app.get("/api/preview_voice")
+async def preview_voice(voice_id: str):
+    """Generate a short preview for a specific voice."""
+    if not model_loaded or tts is None:
+        raise HTTPException(503, "Model not loaded.")
+    
+    try:
+        voice_data = tts.get_preset_voice(voice_id)
+        ref_codes  = voice_data["codes"]
+        ref_text   = voice_data["text"]
+        
+        if isinstance(ref_codes, torch.Tensor):
+            ref_codes = ref_codes.cpu().numpy()
+
+        # Just generate the reference text itself as preview
+        wav = tts.infer(
+            ref_text,
+            ref_codes=ref_codes,
+            ref_text=ref_text,
+            temperature=1.0,
+            max_chars=256,
+            skip_normalize=False,
+        )
+        
+        if wav is None or len(wav) == 0:
+            raise HTTPException(500, "Preview generation failed.")
+
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav", dir=tempfile.gettempdir())
+        sf.write(tmp.name, wav, 24000)
+        tmp.close()
+
+        return FileResponse(tmp.name, media_type="audio/wav")
+
+    except Exception as e:
+        print(f"Preview error: {e}")
+        raise HTTPException(500, str(e))
+
 @app.post("/api/generate")
 async def generate(req: GenerateRequest):
     """Generate speech, return path to temp .wav file."""
