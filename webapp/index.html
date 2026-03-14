@@ -119,6 +119,15 @@
         <textarea class="text-editor" id="text-input"
           placeholder="Nhập văn bản tiếng Việt tại đây…"
           maxlength="3000"></textarea>
+        <div class="editor-footer">
+          <div class="footer-left">
+            <span class="style-chip" id="style-chip-preset">Giọng: Chưa chọn</span>
+          </div>
+          <button class="btn-generate" id="btn-generate" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            GENERATE
+          </button>
+        </div>
       </div>
     </div>
 
@@ -146,23 +155,25 @@
         <textarea class="text-editor" id="text-input-clone"
           placeholder="Nhập văn bản cần đọc với giọng clone…"
           maxlength="3000"></textarea>
+        <div class="editor-footer">
+          <div class="footer-left">
+            <span class="style-chip" id="style-chip-clone">Chế độ Clone</span>
+          </div>
+          <button class="btn-generate" id="btn-generate-clone" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            GENERATE
+          </button>
+        </div>
       </div>
     </div>
 
   </div><!-- end panels-wrapper -->
 
-  <!-- ★ ALWAYS-VISIBLE GENERATE BAR ★ -->
+  <!-- Simple Footer Status (Optional) -->
   <div class="main-gen-bar">
-    <span class="style-chip" id="style-chip">Giọng: Chưa chọn</span>
-    <div class="gen-bar-right">
-      <button class="btn-generate" id="btn-generate" disabled>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        GENERATE
-      </button>
-      <button class="btn-generate hidden" id="btn-generate-clone" disabled>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        GENERATE
-      </button>
+    <div class="sidebar-status" style="margin-bottom:0; background:none;">
+      <div class="status-dot" id="footer-status-dot"></div>
+      <span id="footer-status-text">Chưa tải model</span>
     </div>
   </div>
 

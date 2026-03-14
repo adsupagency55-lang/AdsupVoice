@@ -45,10 +45,15 @@ async function fetchStatus() {
     const msBb = $('ms-backbone');
     const msCo = $('ms-codec');
     const msSt = $('ms-status');
+    const footDot = $('footer-status-dot');
+    const footTxt = $('footer-status-text');
 
     if (s.model_loaded) {
       dot.className  = 'status-dot ready';
       txt.textContent = 'Sẵn sàng';
+      if (footDot) footDot.className = 'status-dot ready';
+      if (footTxt) footTxt.textContent = 'Sẵn sàng';
+
       msBb.textContent = s.backbone || '—';
       msCo.textContent = s.codec    || '—';
       msSt.textContent = '✅ Đã tải';
@@ -61,6 +66,8 @@ async function fetchStatus() {
     } else {
       dot.className  = 'status-dot loading';
       txt.textContent = 'Đang tải model…';
+      if (footDot) footDot.className = 'status-dot loading';
+      if (footTxt) footTxt.textContent = 'Đang tải model…';
       msSt.textContent = '⏳ Loading';
       msSt.style.color = '#f59e0b';
       return false;
@@ -204,7 +211,9 @@ function updateSelectedVoiceUI() {
   $('sel-name').textContent  = selectedVoiceName || 'Chưa chọn';
   $('sel-style').textContent = 'Vietnamese TTS';
   $('sel-avatar').textContent = selectedVoiceName ? selectedVoiceName[0].toUpperCase() : 'V';
-  $('style-chip').textContent = `Giọng: ${selectedVoiceName || 'Chưa chọn'}`;
+  if ($('style-chip-preset')) {
+    $('style-chip-preset').textContent = `Giọng: ${selectedVoiceName || 'Chưa chọn'}`;
+  }
   $('btn-generate').disabled = !selectedVoiceId;
 }
 
@@ -263,9 +272,6 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
     const mode = tab.dataset.mode;
     $('panel-preset').classList.toggle('hidden', mode !== 'preset');
     $('panel-clone').classList.toggle('hidden',  mode !== 'clone');
-    // Swap which generate button shows in the sticky bar
-    $('btn-generate').classList.toggle('hidden', mode !== 'preset');
-    $('btn-generate-clone').classList.toggle('hidden', mode !== 'clone');
   });
 });
 
