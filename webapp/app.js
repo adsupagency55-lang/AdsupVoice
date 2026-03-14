@@ -144,7 +144,7 @@ $('btn-load-model').addEventListener('click', async () => {
 });
 
 /* ─────────────────────────────── VOICE CAROUSEL ─────────────────────── */
-const VOICE_EMOJIS = ['🦜','🎤','🎧','👩','👨','🌺','🌊','🏔️','🌸','🎼'];
+const VOICE_EMOJIS = ['🎤','🎧','👩','👨','🌺','🌊','🏔️','🌸','🎼','🎙️'];
 
 function renderCarousel() {
   const track = $('carousel-track');
@@ -270,8 +270,10 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
     document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     const mode = tab.dataset.mode;
+    console.log('Switching to mode:', mode);
     $('panel-preset').classList.toggle('hidden', mode !== 'preset');
     $('panel-clone').classList.toggle('hidden',  mode !== 'clone');
+    console.log('Button Clone state:', $('btn-generate-clone') ? 'Exists' : 'MISSING');
   });
 });
 
@@ -467,6 +469,7 @@ document.querySelectorAll('.nav-item[data-page]').forEach(a => {
 
 /* ─────────────────────────────── INIT ─────────────────────── */
 async function init() {
+  console.log('App init. Button Clone check:', $('btn-generate-clone') ? 'Exists' : 'MISSING');
   await loadModels();
   await fetchStatus();
   renderHistory();
